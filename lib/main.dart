@@ -3,6 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:fl_chart/fl_chart.dart';
+
+
 void main() {
   runApp(const MyApp());
 }
@@ -196,7 +199,7 @@ class ForumSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PostList(posts: posts);
+    return PostList(posts: posts, onTabWidget: (post) => PostDetailPage(post: post), leading: const Icon(Icons.forum));
   }
 }
 
@@ -208,7 +211,7 @@ class VotingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PostList(posts: posts, leading: const Icon(Icons.how_to_vote));
+    return PostList(posts: posts, onTabWidget: (post) => PostVotingPage(post: post), leading: const Icon(Icons.how_to_vote));
   }
 }
 
@@ -216,8 +219,9 @@ class VotingSection extends StatelessWidget {
 
 class PostList extends StatelessWidget {
   final List<Post> posts;
+  final Widget Function(Post post) onTabWidget;
   final Widget leading;
-  const PostList({super.key, required this.posts, this.leading = const Icon(Icons.forum)});
+  const PostList({super.key, required this.posts, required this.onTabWidget, this.leading = const Icon(Icons.forum)});
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +244,7 @@ class PostList extends StatelessWidget {
             // Navigate to the detail page on tap
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => PostDetailPage(post: post)),
+              MaterialPageRoute(builder: (context) => onTabWidget(post)),
             );
           },
         );
@@ -355,37 +359,40 @@ class NewPostPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('New Post'),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            TextField(
-              controller: contentController,
-              decoration: const InputDecoration(
-                labelText: 'Content',
+              const SizedBox(height: 16.0),
+              TextField(
+                controller: contentController,
+                decoration: const InputDecoration(
+                  labelText: 'Content',
+                ),
+                maxLines: null,
               ),
-              maxLines: null,
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                // Use addPost callback to add the post
-                addPost(titleController.text, contentController.text);
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: () {
+                  // Use addPost callback to add the post
+                  addPost(titleController.text, contentController.text);
 
-                // Optionally, clear the controllers or navigate away
-                titleController.clear();
-                contentController.clear();
-                Navigator.pop(context);
-              },
-              child: const Text('Post'),
-            ),
-          ],
+                  // Optionally, clear the controllers or navigate away
+                  titleController.clear();
+                  contentController.clear();
+                  Navigator.pop(context);
+                },
+                child: const Text('Post'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -402,6 +409,11 @@ class Post {
   final String creationDate = DateTime.now().toString();
   final List<String> comments = [];
   int score = 0;
+  final Map<String, int> votes = {
+    'agree': 1,
+    'I don\'t care': 1,
+    'disagree': 1,
+  };
 
   Post({required this.title, required this.content, required this.author});
 
@@ -539,6 +551,104 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     onPressed: _submitComment,
                     child: const Icon(Icons.send),
                   ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class PostVotingPage extends StatefulWidget {
+  final Post post;
+
+  const PostVotingPage({Key? key, required this.post}) : super(key: key);
+
+  @override
+  State<PostVotingPage> createState() => _PostVotingPageState();
+}
+
+class _PostVotingPageState extends State<PostVotingPage> {
+  final List<Color> _colors = [Colors.blue, Colors.green, Colors.red, Colors.yellow, Colors.purple, Colors.orange, Colors.teal];
+  List<PieChartSectionData> getSections() {
+    final totalVotes = widget.post.votes.values.fold<int>(0, (sum, item) => sum + item);
+    return widget.post.votes.entries.map((entry) {
+      const double fontSize = 16;
+      const double radius = 50;
+      final votePercentage = ((entry.value / totalVotes) * 100).toStringAsFixed(1);
+      return PieChartSectionData(
+        color: _colors[entry.key.hashCode % _colors.length],
+        value: entry.value.toDouble(),
+        title: '${entry.key} ($votePercentage%)',
+        radius: radius,
+        titleStyle: const TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 0)),
+      );
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Voting for ${widget.post.title}'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.post.title,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.post.content,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Score: ${widget.post.score}',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'By ${widget.post.author} on ${widget.post.creationDate}',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Voting',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Container(
+                alignment: Alignment.center,
+                height: 300,
+                child: PieChart(
+                  PieChartData(
+                    sections: getSections(),
+                    centerSpaceRadius: 40,
+                    sectionsSpace: 2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  for (final vote in widget.post.votes.keys)
+                    TextButton(
+                      onPressed: () {
+                        widget.post.votes[vote] = widget.post.votes[vote]! + 1;
+                        setState(() {});
+                      },
+                      child: Text(vote),
+                    ),
                 ],
               ),
             ],
