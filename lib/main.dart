@@ -343,11 +343,11 @@ class NewPostPage extends StatelessWidget {
   final String defaultContent;
 
   const NewPostPage({
-    Key? key, 
+    super.key, 
     required this.addPost,
     this.defaultTitle = 'Default Title',
     this.defaultContent = 'Interesting Content',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -430,7 +430,7 @@ class Post {
 class PostDetailPage extends StatefulWidget {
   final Post post;
 
-  const PostDetailPage({Key? key, required this.post}) : super(key: key);
+  const PostDetailPage({super.key, required this.post});
 
   @override
   State<PostDetailPage> createState() => _PostDetailPageState();
@@ -565,22 +565,24 @@ class _PostDetailPageState extends State<PostDetailPage> {
 class PostVotingPage extends StatefulWidget {
   final Post post;
 
-  const PostVotingPage({Key? key, required this.post}) : super(key: key);
+  const PostVotingPage({super.key, required this.post});
 
   @override
   State<PostVotingPage> createState() => _PostVotingPageState();
 }
 
 class _PostVotingPageState extends State<PostVotingPage> {
-  final List<Color> _colors = [Colors.blue, Colors.green, Colors.red, Colors.yellow, Colors.purple, Colors.orange, Colors.teal];
+  final List<Color> _colors = [Colors.green, Colors.blue, Colors.red, Colors.yellow, Colors.purple, Colors.orange, Colors.teal];
   List<PieChartSectionData> getSections() {
     final totalVotes = widget.post.votes.values.fold<int>(0, (sum, item) => sum + item);
-    return widget.post.votes.entries.map((entry) {
+    return widget.post.votes.entries.indexed.map((x) {
+      final i = x.$1;
+      final entry = x.$2;
       const double fontSize = 16;
       const double radius = 50;
       final votePercentage = ((entry.value / totalVotes) * 100).toStringAsFixed(1);
       return PieChartSectionData(
-        color: _colors[entry.key.hashCode % _colors.length],
+        color: _colors[i],
         value: entry.value.toDouble(),
         title: '${entry.key} ($votePercentage%)',
         radius: radius,
@@ -663,7 +665,7 @@ class _PostVotingPageState extends State<PostVotingPage> {
 class SearchPage extends StatefulWidget {
   final List<Post> posts;
 
-  const SearchPage({Key? key, required this.posts}) : super(key: key);
+  const SearchPage({super.key, required this.posts});
 
   @override
   _SearchPageState createState() => _SearchPageState();
