@@ -82,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String author = 'Neuer Autor'; // Default author
   String region = 'Berlin'; // Default region
+  int regionLevel = 1;
 
   Map<int, Post> posts = {};
 
@@ -131,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: Text('Region: $region'),
+        title: TitleDropDown(options: ['Deutschland', region], regionLevel: regionLevel, setRegionLevel: (newLevel) => setState(() => regionLevel = newLevel)),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -188,6 +189,44 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: _onItemTapped,
       ),
     );
+  }
+}
+
+
+
+class TitleDropDown extends StatefulWidget {
+  final List<String> options;
+  final int regionLevel;
+  final Function(int newLevel) setRegionLevel;
+
+  const TitleDropDown({super.key, required this.options, required this.regionLevel, required this.setRegionLevel});
+
+  @override
+  State<TitleDropDown> createState() => _TitleDropDownState();
+}
+
+
+class _TitleDropDownState extends State<TitleDropDown> {
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: [
+      Text('Region: ', style: Theme.of(context).textTheme.headlineLarge),
+      DropdownButton<int>(
+        value: widget.regionLevel,
+        onChanged: (i) {
+          widget.setRegionLevel(i!);
+        },
+        items: List.generate(widget.options.length, (index) {
+          return DropdownMenuItem<int>(
+            value: index,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(widget.options[index], style: Theme.of(context).textTheme.headlineLarge),
+            )
+          );
+        }),
+      )
+    ]);
   }
 }
 
