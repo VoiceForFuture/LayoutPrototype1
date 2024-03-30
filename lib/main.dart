@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'VoiceForFuture',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'VoiceForFuture'),
     );
   }
 }
@@ -80,7 +80,7 @@ Function generateRandomContent = () {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  String author = 'New Author'; // Default author
+  String author = 'Neuer Autor'; // Default author
   String region = 'Berlin'; // Default region
 
   Map<int, Post> posts = {};
@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     // Generate some random posts
     for (var i = 0; i < 3; i++) {
-      Post post = addPost('Post $i', generateRandomContent(), 'Author $i');
+      Post post = addPost('Beitrag $i', generateRandomContent(), 'Autor $i');
       post.score = Random().nextInt(42);
     }
   }
@@ -131,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: Text(region),
+        title: Text('Region: $region'),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -166,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
             MaterialPageRoute(builder: (context) => NewPostPage(addPost: addPost)),
           );
         },
-        tooltip: 'Add new post',
+        tooltip: 'Beitrag hinzufügen',
         child: const Icon(Icons.add),
       ) : null,
       bottomNavigationBar: BottomNavigationBar(
@@ -177,11 +177,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.how_to_vote),
-            label: 'Voting',
+            label: 'Abstimmungen',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Settings',
+            label: 'Einstellungen',
           ),
         ],
         currentIndex: _selectedIndex,
@@ -238,7 +238,7 @@ class PostList extends StatelessWidget {
         return ListTile(
           leading: leading,
           title: Text(post.title),
-          subtitle: Text('${post.content.substring(0, len)}... by ${post.author}'),
+          subtitle: Text('${post.content.substring(0, len)}... von ${post.author}'),
           // trailing: Text('Score: ${post.score}'),
           onTap: () {
             // Navigate to the detail page on tap
@@ -345,8 +345,8 @@ class NewPostPage extends StatelessWidget {
   const NewPostPage({
     super.key, 
     required this.addPost,
-    this.defaultTitle = 'Default Title',
-    this.defaultContent = 'Interesting Content',
+    this.defaultTitle = 'Irgendein Titel',
+    this.defaultContent = 'Spannender Inhalt...',
   });
 
   @override
@@ -357,7 +357,7 @@ class NewPostPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Post'),
+        title: const Text('Neuer Beitrag'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -367,14 +367,14 @@ class NewPostPage extends StatelessWidget {
               TextField(
                 controller: titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Title',
+                  labelText: 'Titel',
                 ),
               ),
               const SizedBox(height: 16.0),
               TextField(
                 controller: contentController,
                 decoration: const InputDecoration(
-                  labelText: 'Content',
+                  labelText: 'Inhalt',
                 ),
                 maxLines: null,
               ),
@@ -389,7 +389,7 @@ class NewPostPage extends StatelessWidget {
                   contentController.clear();
                   Navigator.pop(context);
                 },
-                child: const Text('Post'),
+                child: const Text('Beitrag'),
               ),
             ],
           ),
@@ -410,9 +410,9 @@ class Post {
   final List<String> comments = [];
   int score = 0;
   final Map<String, int> votes = {
-    'agree': 1,
-    'I don\'t care': 1,
-    'disagree': 1,
+    'Stimme zu': 1,
+    'Keine Meinung': 1,
+    'Stimme nicht zu': 1,
   };
 
   Post({required this.title, required this.content, required this.author});
@@ -488,7 +488,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               Row(
                 children: [
                   Text(
-                    'Score: ${widget.post.score}',
+                    'Relevanz: ${widget.post.score}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(width: 16),
@@ -510,7 +510,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'By ${widget.post.author} on ${widget.post.creationDate}',
+                'Von ${widget.post.author} am ${widget.post.creationDate}',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
@@ -520,7 +520,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Comments',
+                'Kommentare',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -530,7 +530,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   child: Text(comment),
                 ),
               widget.post.comments.isEmpty
-                  ? const Text('No comments yet')
+                  ? const Text('Noch keine Kommentare. Sei der Erste!')
                   : const SizedBox.shrink(),
               const SizedBox(height: 24),
               Row(
@@ -539,7 +539,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     child: TextFormField(
                       controller: _commentController,
                       decoration: const InputDecoration(
-                        hintText: 'Add a comment...',
+                        hintText: 'Kommentar hinzufügen...',
                         border: OutlineInputBorder(),
                       ),
                       maxLines: null,
@@ -595,7 +595,7 @@ class _PostVotingPageState extends State<PostVotingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Voting for ${widget.post.title}'),
+        title: Text('Abstimmung für ${widget.post.title}'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -614,17 +614,17 @@ class _PostVotingPageState extends State<PostVotingPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Score: ${widget.post.score}',
+                'Relevanz: ${widget.post.score}',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
               Text(
-                'By ${widget.post.author} on ${widget.post.creationDate}',
+                'Von ${widget.post.author} am ${widget.post.creationDate}',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
               Text(
-                'Voting',
+                'Abstimmung',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
@@ -689,7 +689,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Posts'),
+        title: const Text('Beiträge durchsuchen'),
       ),
       body: Column(
         children: [
@@ -697,7 +697,7 @@ class _SearchPageState extends State<SearchPage> {
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               decoration: const InputDecoration(
-                hintText: 'Search...',
+                hintText: 'Suche...',
                 border: OutlineInputBorder(),
                 suffixIcon: Icon(Icons.search),
               ),
